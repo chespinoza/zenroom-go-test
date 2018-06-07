@@ -3,7 +3,7 @@ box: golang
 build:
   steps:
     - setup-go-workspace
-    - skidder/glide-install@1.0.3
+    - wercker/glide-install@3.0.1
     - glide-install
     - script:
         name: test
