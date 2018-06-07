@@ -9,6 +9,5 @@ build:
         name: test
         code: |
           go version
-          glide install
           go build
           ./zenroom-go-test
