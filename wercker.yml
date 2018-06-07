@@ -4,6 +4,7 @@ build:
   steps:
     - setup-go-workspace
     - skidder/glide-install@1.0.3
+    - glide-install
     - script:
         name: test
         code: |
