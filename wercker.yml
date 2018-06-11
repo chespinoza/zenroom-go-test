@@ -3,8 +3,8 @@ box: golang
 build:
   steps:
     - setup-go-workspace
-    - wercker/glide-install@3.0.1
-    - glide-install
+    - almogbaku/dep-ensure@0.3.1
+    - almogbaku/dep-ensure
     - script:
         name: test
         code: |
