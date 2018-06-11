@@ -1,3 +1,0 @@
-package: github.com/chespinoza/zenroom-go-test
-import:
-- package: github.com/thingful/zenroom-go
