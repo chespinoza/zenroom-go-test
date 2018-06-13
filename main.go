@@ -9,10 +9,10 @@ import (
 func main() {
 
 	// Data to encrypt/decrypt
-	data := "my-data"
+	data := []byte("secret data")
 
 	// Generate Keys
-	genKeysScript := `
+	genKeysScript := []byte(`
 	octet = require 'octet'
 	ecdh = require 'ecdh'
 	json = require 'json'
@@ -22,52 +22,50 @@ func main() {
 	
 	output = json.encode({
 		public = keyring:public():base64(),
-		secret = keyring:private():base64()
+		private = keyring:private():base64()
 	})
 
 	print(output)
-	`
-	keys, err := zenroom.Exec(genKeysScript, "", "")
+	`)
+	keys, err := zenroom.Exec(genKeysScript, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Keys:", keys)
+	log.Printf("Keys: %s", keys)
 
 	// Encrypt data
-	encryptScript := `
-	octet = require 'octet'
-	ecdh = require 'ecdh'
-	json = require 'json'
+	encryptScript := []byte(`
+		octet = require 'octet'
+		ecdh = require 'ecdh'
+		json = require 'json'
 
-	msg = octet.new(#DATA)
-	msg:string(DATA)
-
-	keys = json.decode(KEYS)
-
-	keyring = ecdh.new('ec25519')
-
-	public = octet.new()
-	public:base64(keys.public)
-
-	secret = octet.new()
-	secret:base64(keys.secret)
-
-	keyring:public(public)
-	keyring:private(secret)
-
-	sess = keyring:session(public)
-	zmsg = keyring:encrypt(sess, msg):base64()
-	print(zmsg)
-	`
+		msg = octet.new(#DATA)
+		msg:string(DATA)
+		
+		keys = json.decode(KEYS)
+		keyring = ecdh.new('ec25519')
+		
+		public = octet.new()
+		public:base64(keys.public)
+		
+		private = octet.new()
+		private:base64(keys.private)
+		keyring:public(public)
+		keyring:private(private)
+		
+		sess = keyring:session(public)
+		zmsg = keyring:encrypt(sess, msg):base64()
+		print(zmsg)
+	`)
 	encryptedMsg, err := zenroom.Exec(encryptScript, keys, data)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Original Message:", data)
-	log.Println("Encrypted Message:", encryptedMsg)
+	log.Printf("Original Message: %s", data)
+	log.Printf("Encrypted Message: %s", encryptedMsg)
 
 	// Decrypt data
-	decryptScript := `
+	decryptScript := []byte(`
 	octet = require 'octet'
 	ecdh = require 'ecdh'
 	json = require 'json'
@@ -82,19 +80,19 @@ func main() {
 	public = octet.new()
 	public:base64(keys.public)
 
-	secret = octet.new()
-	secret:base64(keys.secret)
+	private = octet.new()
+	private:base64(keys.private)
 
 	keyring:public(public)
-	keyring:private(secret)
+	keyring:private(private)
 
 	sess = keyring:session(public)
 	msg = keyring:decrypt(sess, zmsg)
 	print(msg)
-	`
+	`)
 	decryptedMsg, err := zenroom.Exec(decryptScript, keys, encryptedMsg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Decrypted Message:", decryptedMsg)
+	log.Printf("Decrypted Message:%s\n", decryptedMsg)
 }
